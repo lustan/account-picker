@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "Account Picker",
+  "version": "2.0.3",
+  "description": "Too many accounts to remember which environment they belong to. Use this extension for quick login.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "Account Picker"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*.png"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": ["content.js"]
+    }
+  ],
+  "options_page": "options.html"
+} 

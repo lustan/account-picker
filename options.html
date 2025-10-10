@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Extension Settings</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="sidebar">
+      <h2><img class="nav-icon" src="icons/logo.png" alt="logo" />Account Picker</h2>
+      <div class="nav">
+        <div class="nav-item active" id="nav-env"><img class="nav-icon" src="icons/environment.png" alt="env" />Environment Management</div>
+        <div class="nav-item" id="nav-account"><img class="nav-icon" src="icons/account.png" alt="account" />Account Management</div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="section-header">
+          <div class="section-title"></div>
+          <div class="add-row add-row-header" id="envAddRow">
+            <input id="envName" placeholder="Environment Name" />
+            <input id="envUrl" placeholder="Environment URL" />
+            <input id="envUserSelector" placeholder="Username Selector" />
+            <input id="envPwdSelector" placeholder="Password Selector" />
+            <button class="btn" id="addEnv">Add</button>
+          </div>
+          <div class="add-row add-row-header" id="accAddRow" style="display:none;">
+            <input id="accUser" placeholder="Phone/Username" />
+            <input id="accPwd" type="password" placeholder="Password" />
+            <input id="accRemark" placeholder="Remark" />
+            <select id="accEnv"></select>
+            <button class="btn" id="addAccount">Add</button>
+            <div class="import-export-bar" id="importExportBar"></div>
+          </div>
+        </div>
+        <div class="accounts-toolbar" id="tabsBar" style="display:none;">
+          <div class="env-tabs" id="envTabs"></div>
+        </div>
+      </div>
+      <div class="content-scroll">
+        <div id="env-section">
+          <div class="list" id="envList"></div>
+        </div>
+        <div id="account-section" style="display:none;">
+        <div class="list" id="accountList" style="box-shadow: 0 2px 12px rgba(0,0,0,.04); background:#fff;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 右侧悬浮按钮：手册与 GitHub -->
+  <div class="floating-actions">
+    <button class="float-btn" id="btnManual" title="Manual"><img src="icons/manual.png" alt="manual" /></button>
+    <button class="float-btn" id="btnGithub" title="GitHub"><img src="icons/github.png" alt="github" /></button>
+  </div>
+
+  <!-- 手册弹窗 -->
+  <div class="modal-mask" id="manualMask"></div>
+  <div class="modal" id="manualModal" role="dialog" aria-modal="true" aria-labelledby="manualTitle">
+    <div class="modal-header">
+      <div class="modal-title" id="manualTitle">Extension Manual</div>
+      <button class="modal-close" id="manualClose" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body" id="manualContent">
+      <h4>1) Environment Management</h4>
+      <ol>
+        <li>Add environments at the top: <b>Environment Name</b>, <b>Environment URL</b>, and optional <b>Username/Password Selectors</b>. Click Add.</li>
+        <li>Selector examples:
+          <pre>#login_field
+.login-input
+input[placeholder*="username"]</pre>
+        </li>
+        <li>Disable Autofill: turn off browser suggestions on this environment to avoid conflicts.</li>
+      </ol>
+      <h4>2) Account Management</h4>
+      <ol>
+        <li>Add accounts: Phone/Username, Password, Remark, Environment.</li>
+        <li>Use tabs to filter by environment. Supports pagination, delete and environment switching.</li>
+        <li>Import/Export JSON with fields: username/password/remark/envName.</li>
+      </ol>
+      <h4>3) Autofill on Pages</h4>
+      <ol>
+        <li>On a configured URL, open the extension popup and pick an account to autofill and sign in.</li>
+        <li>If fields are not located correctly, adjust selectors in Environment settings.</li>
+      </ol>
+      <h4>4) Tips</h4>
+      <ol>
+        <li>Password column supports show/hide; inline edits auto-save.</li>
+        <li>For issues or requests, click the GitHub icon on the right.</li>
+      </ol>
+    </div>
+  </div>
+  <script src="config.js"></script>
+  <script src="options.js"></script>
+</body>
+</html> 
