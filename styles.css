@@ -521,3 +521,87 @@ body {
   height: 14px;
   cursor: pointer;
 }
+
+/* 交互与视觉优化 */
+.main {
+  padding: 16px 36px 20px;
+}
+
+.topbar {
+  background: #fff;
+  border: 1px solid #eceff5;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, .04);
+}
+
+.list,
+.table,
+.env-table,
+.acc-table {
+  border-radius: 12px !important;
+}
+
+.list {
+  padding: 20px;
+  border: 1px solid #eceff5;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+}
+
+.add-row-header input,
+.add-row-header select {
+  min-width: 150px !important;
+}
+
+#envAddRow #envName,
+#envAddRow #envGroup {
+  min-width: 170px !important;
+}
+
+.accounts-toolbar {
+  background: #fff;
+  border: 1px solid #eceff5;
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.group-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.group-filter select {
+  border: 1px solid #d8deea;
+  border-radius: 8px;
+  height: 30px;
+  padding: 0 10px;
+  background: #fff;
+  min-width: 140px;
+}
+
+.env-tabs {
+  border-bottom: none;
+  gap: 14px;
+  overflow-x: auto;
+}
+
+.env-tab {
+  background: #f4f7ff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.env-tab.active {
+  background: #e8f1ff;
+  font-weight: 600;
+}
+
+.env-tab.active::after {
+  display: none;
+}

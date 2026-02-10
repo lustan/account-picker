@@ -20,6 +20,7 @@
           <div class="section-title"></div>
           <div class="add-row add-row-header" id="envAddRow">
             <input id="envName" placeholder="Environment Name" />
+            <input id="envGroup" placeholder="Group (e.g. Prod/Test)" />
             <input id="envUrl" placeholder="Environment URL" />
             <input id="envUserSelector" placeholder="Username Selector" />
             <input id="envPwdSelector" placeholder="Password Selector" />
@@ -35,6 +36,10 @@
           </div>
         </div>
         <div class="accounts-toolbar" id="tabsBar" style="display:none;">
+          <div class="group-filter" id="groupFilterWrap">
+            <label for="groupFilter">Group</label>
+            <select id="groupFilter"></select>
+          </div>
           <div class="env-tabs" id="envTabs"></div>
         </div>
       </div>

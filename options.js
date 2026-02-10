@@ -1,12 +1,21 @@
 let envs = [];
 let accounts = [];
 let currentEnvFilter = "";
+let currentGroupFilter = "";
 let currentPage = 1;
 const PAGE_SIZE = 10;
 
 const DEFAULT_ENVS = [
-  { name: 'GitHub', url: 'github.com', userSelector: '#login_field', passwordSelector: '#password', disableAutofill: false }
+  { name: 'GitHub', group: 'Default', url: 'github.com', userSelector: '#login_field', passwordSelector: '#password', disableAutofill: false }
 ];
+
+function getEnvGroup(env) {
+  return (env.group || 'Ungrouped').trim() || 'Ungrouped';
+}
+
+function getGroupList() {
+  return [...new Set(envs.map(getEnvGroup))].sort((a, b) => a.localeCompare(b));
+}
 
 // 通用提示工具：创建/显示帮助气泡（供多处复用）
 function getOrCreateHelpTip() {
@@ -59,15 +68,18 @@ function loadData() {
       envs = result.envs;
       // 兼容旧字段：pwdSelector -> passwordSelector
       envs = envs.map(e => {
+        const normalized = { ...e };
         if (!e.passwordSelector && e.pwdSelector) {
-          return { ...e, passwordSelector: e.pwdSelector };
+          normalized.passwordSelector = e.pwdSelector;
         }
-        return e;
+        if (!normalized.group) normalized.group = 'Ungrouped';
+        return normalized;
       });
     }
     accounts = result.accounts || [];
     renderEnvList();
     renderEnvTabs();
+    renderGroupFilter();
     renderEnvSelect();
     // 默认显示环境页数据
     renderAccountList();
@@ -90,6 +102,7 @@ function renderEnvList() {
       <tr>
         <th style='width:40px;'>No.</th>
         <th>Environment Name</th>
+        <th>Group</th>
         <th>Environment URL</th>
         <th>Username Selector <img class="help-icon" id="userSelHelp" data-help="selector" src="icons/help.png" alt="help"></th>
         <th>Password Selector <img class="help-icon" id="pwdSelHelp" data-help="selector" src="icons/help.png" alt="help"></th>
@@ -114,6 +127,13 @@ function renderEnvList() {
     inputName.value = e.name;
     tdName.appendChild(inputName);
     tr.appendChild(tdName);
+    // Group
+    const tdGroup = document.createElement('td');
+    const inputGroup = document.createElement('input');
+    inputGroup.className = 'env-group';
+    inputGroup.value = getEnvGroup(e);
+    tdGroup.appendChild(inputGroup);
+    tr.appendChild(tdGroup);
     // Environment URL
     const tdUrl = document.createElement('td');
     const inputUrl = document.createElement('input');
@@ -179,6 +199,8 @@ document.getElementById('envList').addEventListener('input', function(e) {
     envs[idx].name = e.target.value;
   } else if (e.target.classList.contains('env-url')) {
     envs[idx].url = e.target.value;
+  } else if (e.target.classList.contains('env-group')) {
+    envs[idx].group = e.target.value;
   } else if (e.target.classList.contains('env-user-selector')) {
     envs[idx].userSelector = e.target.value;
   } else if (e.target.classList.contains('env-pwd-selector')) {
@@ -188,6 +210,7 @@ document.getElementById('envList').addEventListener('input', function(e) {
   renderEnvSelect();
   renderAccountList();
   renderEnvTabs();
+  renderGroupFilter();
 });
 document.getElementById('envList').addEventListener('change', function(e) {
   const tr = e.target.closest('tr[data-idx]');
@@ -211,8 +234,9 @@ document.getElementById('envList').addEventListener('click', function(e) {
     saveData();
     renderEnvList();
     renderEnvSelect();
-  renderAccountList();
-  renderEnvTabs();
+    renderAccountList();
+    renderEnvTabs();
+    renderGroupFilter();
   }
 });
 
@@ -223,7 +247,9 @@ document.getElementById('addEnv').onclick = () => {
   const pwdSelector = document.getElementById('envPwdSelector').value.trim();
   if (!name || !url) return alert('Please fill in environment name and URL');
   envs.push({
-    name, url,
+    name,
+    group: (document.getElementById('envGroup').value || '').trim() || 'Ungrouped',
+    url,
     userSelector,
     passwordSelector: pwdSelector,
     disableAutofill: false
@@ -232,7 +258,9 @@ document.getElementById('addEnv').onclick = () => {
   renderEnvList();
   renderEnvSelect();
   renderEnvTabs();
+  renderGroupFilter();
   document.getElementById('envName').value = '';
+  document.getElementById('envGroup').value = '';
   document.getElementById('envUrl').value = '';
   document.getElementById('envUserSelector').value = '';
   document.getElementById('envPwdSelector').value = '';
@@ -250,10 +278,16 @@ function renderEnvTabs() {
     el.textContent = label;
     return el;
   };
+  const groupedEnvs = envs
+    .map((env, idx) => ({ env, idx }))
+    .filter(({ env }) => currentGroupFilter === '' || getEnvGroup(env) === currentGroupFilter);
   tabs.appendChild(createTab('All Environments', '', currentEnvFilter === ''));
-  envs.forEach((e, i) => {
+  groupedEnvs.forEach(({ env: e, idx: i }) => {
     tabs.appendChild(createTab(e.name, String(i), String(i) === currentEnvFilter));
   });
+  if (currentEnvFilter !== '' && !groupedEnvs.some(({ idx }) => String(idx) === currentEnvFilter)) {
+    currentEnvFilter = '';
+  }
   tabs.onclick = (e) => {
     const tab = e.target.closest('.env-tab');
     if (!tab) return;
@@ -266,17 +300,39 @@ function renderEnvTabs() {
   };
 }
 
+function renderGroupFilter() {
+  const sel = document.getElementById('groupFilter');
+  if (!sel) return;
+  const groups = getGroupList();
+  sel.innerHTML = [`<option value="">All Groups</option>`, ...groups.map(g => `<option value="${g}">${g}</option>`)].join('');
+  if (currentGroupFilter && !groups.includes(currentGroupFilter)) {
+    currentGroupFilter = '';
+  }
+  sel.value = currentGroupFilter;
+}
+
+document.getElementById('groupFilter')?.addEventListener('change', (e) => {
+  currentGroupFilter = e.target.value;
+  currentEnvFilter = '';
+  currentPage = 1;
+  renderEnvTabs();
+  renderAccountList();
+});
+
 // 账号管理
 function renderEnvSelect() {
   const sel = document.getElementById('accEnv');
-  sel.innerHTML = envs.map((e, i) => `<option value="${i}">${e.name}</option>`).join('');
+  sel.innerHTML = envs.map((e, i) => `<option value="${i}">${e.name} · ${getEnvGroup(e)}</option>`).join('');
 }
 function renderAccountList() {
   const list = document.getElementById('accountList');
   list.innerHTML = '';
   let filtered = accounts;
+  if (currentGroupFilter !== '') {
+    filtered = filtered.filter(a => getEnvGroup(envs[a.envIdx] || {}) === currentGroupFilter);
+  }
   if (currentEnvFilter !== "") {
-    filtered = accounts.filter(a => String(a.envIdx) === currentEnvFilter);
+    filtered = filtered.filter(a => String(a.envIdx) === currentEnvFilter);
   }
   if (!filtered.length) {
     list.innerHTML = '<div class="empty">No accounts available</div>';
@@ -455,7 +511,7 @@ function renderAccountImportExport() {
             if (envName) {
               envIdx = envs.findIndex(e => e.name === envName);
               if (envIdx === -1) {
-                envs.push({ name: envName, url: '', userSelector: '', passwordSelector: '' });
+                envs.push({ name: envName, group: 'Imported', url: '', userSelector: '', passwordSelector: '' });
                 envIdx = envs.length - 1;
               }
             }
@@ -470,7 +526,9 @@ function renderAccountImportExport() {
           });
           saveData();
           renderEnvList();
+          renderGroupFilter();
           saveData();
+          renderEnvTabs();
           renderAccountList();
           alert('Import successful');
         } else {
@@ -523,7 +581,11 @@ document.getElementById('accountList').addEventListener('click', function(e) {
     } else if (btn.dataset.act === 'prev') {
       currentPage = Math.max(1, currentPage - 1);
     } else if (btn.dataset.act === 'next') {
-      const total = (currentEnvFilter !== "") ? accounts.filter(a => String(a.envIdx) === currentEnvFilter).length : accounts.length;
+      const total = accounts.filter((a) => {
+        const groupOk = currentGroupFilter === '' || getEnvGroup(envs[a.envIdx] || {}) === currentGroupFilter;
+        const envOk = currentEnvFilter === '' || String(a.envIdx) === currentEnvFilter;
+        return groupOk && envOk;
+      }).length;
       const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
       currentPage = Math.min(totalPages, currentPage + 1);
     }
